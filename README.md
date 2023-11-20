@@ -1,0 +1,2 @@
+# proiect
+My C++ project
