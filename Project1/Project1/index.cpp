@@ -162,7 +162,7 @@ using namespace std;
             Customer customer3 = customer1; // Using the copy constructor
             Customer customer4;
             customer4 = customer2; // Using the copy assignment operator
-            cout << "Customer 3 (copy of Customer 1) Details:" << endl;
+           // cout << "Customer 3 (copy of Customer 1) Details:" << endl;
             cout << customer3 << endl;
             cout << "Customer 4 (assigned from Customer 2) Details:" << endl;
             cout << customer4 << endl;
