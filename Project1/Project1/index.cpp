@@ -45,38 +45,7 @@ using namespace std;
         }
           
          /*
-         * Event event2("Festival", 20220730, 1000, true);
-       //   std::cout << "Event 2 Details:" << std::endl;
-          event2.displayEventDetails();
-        // Printing the initial event name
-        //std::cout << "Initial Event Name: " << myEvent.getEventName() << std::endl;
-
-        // Changing the event name
-       // myEvent.setEventName("");
-
-        // Printing the new event name
-        //std::cout << "New Event Name: " << myEvent.getEventName() << std::endl;
-
-        // Printing the static event counter
-        //std::cout << "Number of Event instances: " << Event::getEventCounter() << std::endl;
-        //cout << "details event:" << endl;
-         //   myEvent.displayEventDetails();
-        try {
-            Event myEvent("Hello", 5000);
-            // Create an Event instance
-           // Event myEvent("Summer Festival", 5000);
-            //Event myEvent("", 5000);
-            // Try to set the event name to an empty string
-            //myEvent.setEventName("");
-           // event2.setEventName("");
-            // If the exception is not thrown, this line will be executed
-           cout << "Event name set to an empty string successfully." <<endl;
-        }
-        catch (const exception& e) {
-            // Catch and handle the exception
-            cerr << "Exception caught: " << e.what() <<endl;
-        }
-         */ 
+        
        
      
        
