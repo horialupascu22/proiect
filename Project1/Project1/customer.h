@@ -99,19 +99,29 @@ public:
         // Handle other fields as needed
         return is;
     }
+    // Copy Constructor
+    Customer(const Customer& other) : customerId(new long(*other.customerId)), maxTicketsPerCustomer(10) {
+        customerName = new char[strlen(other.customerName) + 1];
+        strcpy_s(customerName, strlen(other.customerName) + 1, other.customerName);
+
+        strcpy_s(email, 100, other.email);
+        age = other.age;
+        memcpy(purchasedTickets, other.purchasedTickets, 10 * sizeof(int));
+    }
+
+    // Copy Assignment Operator
     Customer& operator=(const Customer& other) {
-        if (this != &other) { // Protect against self-assignment
-            delete[] customerName; // Free existing resources
+        if (this != &other) {
+            delete[] customerName;
             delete customerId;
 
             customerName = new char[strlen(other.customerName) + 1];
             strcpy_s(customerName, strlen(other.customerName) + 1, other.customerName);
 
-            *customerId = *(other.customerId);
+            customerId = new long(*other.customerId);
             strcpy_s(email, 100, other.email);
             age = other.age;
             memcpy(purchasedTickets, other.purchasedTickets, 10 * sizeof(int));
-            // maxTicketsPerCustomer and totalCustomers do not need to be copied as they are constant/static
         }
         return *this;
     }
