@@ -1,159 +1,222 @@
-#include <string> // Include for std::string
 #include <iostream>
-#include <string.h> 
-#include "event.h"
-#include "ticket.h"
-#include "customer.h"
+#include <fstream>
+#include <vector>
+#include <limits>
+#include "Ticket.h" // Include your Ticket class header
+#include "event.h"  // Include your Event class header
+#include "customer.h"  // Include your Customer class header
 
 using namespace std;
 
-
 int main() {
+    bool running = true; // Control the main loop
+    char choice; // User's menu choice
+    vector<Ticket> tickets; // Vector to store multiple tickets
+    vector<Event> events; // Vector to store multiple events
+    vector<Customer> customers; // Vector to store multiple customers
 
-    try {
-        Event event1;
-        cout << "Enter details for event1:" << endl;
-        cin >> event1;
-        cout << "Event 1 Details:" << endl;
-        cout << event1 << endl;
+    while (running) {
+        cout << "\nMain Menu:\n";
+        cout << "1. Ticket Menu\n";
+        cout << "2. Event Menu\n";
+        cout << "3. Customer Menu\n";
+        cout << "4. Exit Program\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear the buffer after input
 
-        Event event2("Festival", 20220730, 1000, true);
-        cout << "Event 2 Details:" << endl;
-        cout << event2 << endl;
+        switch (choice) {
+        case '1': // Ticket Menu
+        {
+            bool ticketRunning = true; // Control the ticket menu loop
+            char ticketChoice; // User's menu choice for tickets
 
-        // Demonstrate other overloaded operators
-        event1 = event1 + 50;  // Increase event capacity
-        ++event1;              // Increment capacity
-        if (!event1) {
-            cout << "Event 1 has no capacity." << endl;
+            while (ticketRunning) {
+                cout << "\nTicket Menu:\n";
+                cout << "1. Enter details for a new ticket\n";
+                cout << "2. Show all ticket details\n";
+                cout << "3. Serialize all tickets to file\n";
+                cout << "4. Deserialize tickets from file\n";
+                cout << "5. Exit to Main Menu\n";
+                cout << "Enter your choice: ";
+                cin >> ticketChoice;
+
+                switch (ticketChoice) {
+                case '1': // Enter details for a new ticket
+                {
+                    cin.ignore(); // Clear newline character from the input buffer
+                    Ticket newTicket;
+                    cout << "Enter details for a new ticket:" << endl;
+                    cin >> newTicket;
+                    tickets.push_back(newTicket); // Add new ticket to vector
+                    break;
+                }
+                case '2': // Show all ticket details
+                    for (const auto& ticket : tickets) {
+                        cout << ticket << endl;
+                    }
+                    break;
+                case '3': // Serialize all tickets to file
+                {
+                    ofstream outFile("ticket_data.bin", ios::binary);
+                    if (!outFile) {
+                        cerr << "Error opening 'ticket_data.bin' for writing." << endl;
+                        break;
+                    }
+                    for (const auto& ticket : tickets) {
+                        ticket.serialize(outFile);
+                    }
+                    outFile.close();
+                    cout << "All tickets serialized to 'ticket_data.bin'" << endl;
+                    break;
+                }
+                case '4': // Deserialize tickets from file
+                {
+                    ifstream inFile("ticket_data.bin", ios::binary);
+                    if (!inFile) {
+                        cerr << "Error opening 'ticket_data.bin' for reading." << endl;
+                        break;
+                    }
+                    tickets.clear();
+
+                    Ticket tempTicket;
+                    while (tempTicket.deserialize(inFile)) {
+                        tickets.push_back(tempTicket);
+                    }
+                    inFile.close();
+                    cout << "Tickets deserialized from 'ticket_data.bin'" << endl;
+                    break;
+                }
+                case '5': // Exit to Main Menu
+                    ticketRunning = false;
+                    break;
+                default:
+                    cout << "Invalid choice. Please enter a number between 1 and 5." << endl;
+                }
+            }
+            break;
         }
-        if (event1 < event2) {
-            cout << "Event 1 has less capacity than Event 2." << endl;
-        }
-        if (event1 == event2) {
-            cout << "Event 1 and Event 2 have the same name." << endl;
-        }
+        case '2': // Event Menu
+        {
+            bool eventRunning = true; // Control the event menu loop
+            char eventChoice; // User's menu choice for events
 
-        // Display updated event details
-        cout << "Updated Event 1 Details:" << endl;
-        cout << event1 << endl;
+            while (eventRunning) {
+                cout << "\nEvent Menu:\n";
+                cout << "1. Enter details for a new event\n";
+                cout << "2. Show all event details\n";
+                cout << "3. Serialize all events to file\n";
+                cout << "4. Deserialize events from file\n";
+                cout << "5. Exit to Main Menu\n";
+                cout << "Enter your choice: ";
+                cin >> eventChoice;
 
+                switch (eventChoice) {
+                case '1': // Enter details for a new event
+                {
+                    cin.ignore(); // Clear newline character from the input buffer
+                    Event newEvent;
+                    cout << "Enter details for a new event:" << endl;
+                    cin >> newEvent;
+                    events.push_back(newEvent); // Add new event to vector
+                    break;
+                }
+                case '2': // Show all event details
+                    for (const auto& event : events) {
+                        cout << event << endl;
+                    }
+                    break;
+                case '3': // Serialize all events to file
+                {
+                    ofstream outFile("event_data.txt");
+                    if (!outFile) {
+                        cerr << "Error opening 'event_data.txt' for writing." << endl;
+                        break;
+                    }
+                    for (const auto& event : events) {
+                        event.serialize(outFile);
+                    }
+                    outFile.close();
+                    cout << "All events serialized to 'event_data.txt'" << endl;
+                    break;
+                }
+                case '4': // Deserialize events from file
+                    // TODO: Implement deserialization logic
+                    cout << "Deserialization not implemented yet." << endl;
+                    break;
+                case '5': // Exit to Main Menu
+                    eventRunning = false;
+                    break;
+                default:
+                    cout << "Invalid choice. Please enter a number between 1 and 5." << endl;
+                }
+            }
+            break;
+        }
+        case '3': // Customer Menu
+        {
+            bool customerRunning = true; // Control the customer menu loop
+            char customerChoice; // User's menu choice for customers
+
+            while (customerRunning) {
+                cout << "\nCustomer Menu:\n";
+                cout << "1. Enter details for a new customer\n";
+                cout << "2. Show all customer details\n";
+                cout << "3. Serialize all customers to file\n";
+                cout << "4. Deserialize customers from file\n";
+                cout << "5. Exit to Main Menu\n";
+                cout << "Enter your choice: ";
+                cin >> customerChoice;
+
+                switch (customerChoice) {
+                case '1': // Enter details for a new customer
+                {
+                    cin.ignore(); // Clear newline character from the input buffer
+                    Customer newCustomer;
+                    cout << "Enter details for a new customer:" << endl;
+                    cin >> newCustomer;
+                    customers.push_back(newCustomer); // Add new customer to vector
+                    break;
+                }
+                case '2': // Show all customer details
+                    for (const auto& customer : customers) {
+                        cout << customer << endl;
+                    }
+                    break;
+                case '3': // Serialize all customers to file
+                {
+                    ofstream outFile("customer_data.txt");
+                    if (!outFile) {
+                        cerr << "Error opening 'customer_data.txt' for writing." << endl;
+                        break;
+                    }
+                    for (const auto& customer : customers) {
+                        customer.serialize(outFile);
+                    }
+                    outFile.close();
+                    cout << "All customers serialized to 'customer_data.txt'" << endl;
+                    break;
+                }
+                case '4': // Deserialize customers from file
+                    // TODO: Implement deserialization logic
+                    cout << "Deserialization not implemented yet." << endl;
+                    break;
+                case '5': // Exit to Main Menu
+                    customerRunning = false;
+                    break;
+                default:
+                    cout << "Invalid choice. Please enter a number between 1 and 5." << endl;
+                }
+            }
+            break;
+        }
+        case '4': // Exit Program
+            running = false;
+            break;
+        default:
+            cout << "Invalid choice. Please enter a number between 1 and 4." << endl;
+        }
     }
-    catch (const exception& e) {
-        cerr << "Exception caught: " << e.what() << endl;
-    }
 
-
-
-    /*
-    * Event event2("Festival", 20220730, 1000, true);
-  //   std::cout << "Event 2 Details:" << std::endl;
-     event2.displayEventDetails();
-   // Printing the initial event name
-   //std::cout << "Initial Event Name: " << myEvent.getEventName() << std::endl;
-
-   // Changing the event name
-  // myEvent.setEventName("");
-
-   // Printing the new event name
-   //std::cout << "New Event Name: " << myEvent.getEventName() << std::endl;
-
-   // Printing the static event counter
-   //std::cout << "Number of Event instances: " << Event::getEventCounter() << std::endl;
-   //cout << "details event:" << endl;
-    //   myEvent.displayEventDetails();
-   try {
-       Event myEvent("Hello", 5000);
-       // Create an Event instance
-      // Event myEvent("Summer Festival", 5000);
-       //Event myEvent("", 5000);
-       // Try to set the event name to an empty string
-       //myEvent.setEventName("");
-      // event2.setEventName("");
-       // If the exception is not thrown, this line will be executed
-      cout << "Event name set to an empty string successfully." <<endl;
-   }
-   catch (const exception& e) {
-       // Catch and handle the exception
-       cerr << "Exception caught: " << e.what() <<endl;
-   }
-    */
-
-    try {
-        // Creating Ticket objects
-        Ticket ticket1(25, "ABC123");
-        Ticket ticket2(30, "XYZ456");
-
-        // Print details of tickets
-        cout << "Ticket 1 Details:\n" << ticket1 << endl;
-        cout << "Ticket 2 Details:\n" << ticket2 << endl;
-
-        // Using the + operator to increase the price
-        Ticket ticket3 = ticket1 + 20.0; // Increases ticket1's price by 20
-        cout << "Ticket 3 (increased price) Details:\n" << ticket3 << endl;
-
-        // Using ++ operator (both prefix and postfix)
-        ++ticket2; // Prefix increment
-        ticket2++; // Postfix increment
-        cout << "Ticket 2 (after incrementing price) Details:\n" << ticket2 << endl;
-
-        // Using the cast operator to bool
-        cout << "Ticket 1 is " << (static_cast<bool>(ticket1) ? "" : "not ") << "a VIP ticket.\n";
-
-        // Using the negation operator !
-        if (!ticket1) {
-            cout << "Ticket 1 is free.\n";
-        }
-
-        // Using the conditional operator <
-        if (ticket1 < ticket2) {
-            cout << "Ticket 1 is cheaper than Ticket 2.\n";
-        }
-        else {
-            cout << "Ticket 1 is not cheaper than Ticket 2.\n";
-        }
-
-        // Using the equality operator ==
-        if (ticket1 == ticket3) {
-            cout << "Ticket 1 and Ticket 3 have the same ticket code.\n";
-        }
-        else {
-            cout << "Ticket 1 and Ticket 3 have different ticket codes.\n";
-        }
-
-        // Using the indexing operator []
-        cout << "Available Date for Ticket 1: " << ticket1[0] << endl; // Accessing the first date in availableDates
-
-    }
-    catch (const exception& e) {
-        cerr << "Exception caught: " << e.what() << endl;
-    }
-
-    try {
-        Customer customer1("John Doe", "john@example.com", 30);
-        Customer customer2; // Using the default constructor
-
-        cout << "Customer 1 Details:" << endl;
-        cout << customer1 << endl;
-
-        cout << "Enter details for Customer 2:" << endl;
-        cin >> customer2;
-        cout << "Customer 2 Details:" << endl;
-        cout << customer2 << endl;
-
-        // Demonstrating the copy assignment operator
-        Customer customer3 = customer1; // Using the copy constructor
-        Customer customer4;
-        customer4 = customer2; // Using the copy assignment operator
-        cout << "Customer 3 (copy of Customer 1) Details:" << endl;
-        cout << customer3 << endl;
-        cout << "Customer 4 (assigned from Customer 2) Details:" << endl;
-        cout << customer4 << endl;
-
-    }
-    catch (const exception& e) {
-        cerr << "Exception caught: " << e.what() << endl;
-    }
-
-
+    return 0;
 }
