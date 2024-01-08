@@ -14,43 +14,86 @@ private:
     static int totalTicketsIssued;
     const int maxAvailableDates = 5;
 
-    void copyTicketCode(const char* code) {
-        delete[] ticketCode;
-        ticketCode = new char[strlen(code) + 1];
-        strcpy_s(ticketCode, strlen(code) + 1, code);
-    }
+
 
 public:
-    Ticket() : seatNumber(new int(0)), ticketCode(new char[1]), price(0.0), isVIP(false) {
-        ticketCode[0] = '\0';
-        totalTicketsIssued++;
+    // Function to copy ticket code while properly managing memory
+    void copyTicketCode(const char* code) {
+        delete[] ticketCode; // Delete old ticketCode
+        ticketCode = new char[strlen(code) + 1]; // Allocate memory for the new code
+        strcpy_s(ticketCode, strlen(code) + 1, code); // Copy the new code into ticketCode
+    }
+    void serialize(ofstream& out) const {
+        out.write(reinterpret_cast<const char*>(&seatNumber), sizeof(seatNumber));
+        int codeLength = strlen(ticketCode) + 1; // +1 for null-terminator
+        out.write(reinterpret_cast<const char*>(&codeLength), sizeof(codeLength));
+        out.write(ticketCode, codeLength);
+        out.write(reinterpret_cast<const char*>(&price), sizeof(price));
+        out.write(reinterpret_cast<const char*>(&isVIP), sizeof(isVIP));
     }
 
-    Ticket(int number, const char* code) : seatNumber(new int(number)), ticketCode(nullptr), price(0.0), isVIP(false) {
-        copyTicketCode(code);
-        totalTicketsIssued++;
-    }
-
-    Ticket(const Ticket& other) : seatNumber(new int(*other.seatNumber)), ticketCode(nullptr), price(other.price), isVIP(other.isVIP) {
-        copyTicketCode(other.ticketCode);
-        memcpy(availableDates, other.availableDates, 5 * sizeof(int));
-        totalTicketsIssued++;
-    }
-
-    Ticket& operator=(const Ticket& other) {
-        if (this != &other) {
-            *seatNumber = *other.seatNumber;
-            copyTicketCode(other.ticketCode);
-            price = other.price;
-            isVIP = other.isVIP;
-            memcpy(availableDates, other.availableDates, 5 * sizeof(int));
+    // Deserialization
+    bool deserialize(ifstream& in) {
+        int codeLength;
+        if (!in.read(reinterpret_cast<char*>(&codeLength), sizeof(codeLength))) {
+            return false;
         }
-        return *this;
+        delete[] ticketCode;
+        ticketCode = new char[codeLength];
+        in.read(ticketCode, codeLength);
+        in.read(reinterpret_cast<char*>(&seatNumber), sizeof(seatNumber));
+        in.read(reinterpret_cast<char*>(&price), sizeof(price));
+        in.read(reinterpret_cast<char*>(&isVIP), sizeof(isVIP));
+        return true;
     }
 
-    ~Ticket() {
-        delete seatNumber;
+
+
+    // Default constructor
+    Ticket() : seatNumber(new int(0)), ticketCode(new char[1]), price(0.0), isVIP(false) {
+        ticketCode[0] = '\0'; // Initialize ticketCode with an empty string
+        totalTicketsIssued++; // Increment total tickets issued
+    }
+
+    // Constructor with parameters
+    Ticket(int number, const char* code) : seatNumber(new int(number)), ticketCode(nullptr), price(0.0), isVIP(false) {
+        copyTicketCode(code); // Copy the provided ticket code
+        totalTicketsIssued++; // Increment total tickets issued
+    }
+
+    // Copy constructor
+    Ticket(const Ticket& other) : seatNumber(new int(*other.seatNumber)), ticketCode(nullptr), price(other.price), isVIP(other.isVIP) {
+        copyTicketCode(other.ticketCode); // Copy ticket code from other object
+        memcpy(availableDates, other.availableDates, sizeof(availableDates)); // Copy available dates from other object
+        totalTicketsIssued++; // Increment total tickets issued
+    }
+
+
+    // Assignment operator
+    Ticket& operator=(const Ticket& other) {
+        if (this != &other) { // Check for self-assignment
+            setTicketCode(other.ticketCode); // Set the ticket code from the other object
+            *seatNumber = *other.seatNumber; // Copy seat number from the other object
+            price = other.price; // Copy price from the other object
+            isVIP = other.isVIP; // Copy VIP status from the other object
+        }
+        return *this; // Return reference to the current object
+    }
+    void setTicketCode(const char* code) {
         delete[] ticketCode;
+        if (code) {
+            ticketCode = new char[strlen(code) + 1];
+            strcpy_s(ticketCode, strlen(code) + 1, code); // Use strcpy_s
+        }
+        else {
+            ticketCode = new char[1];
+            ticketCode[0] = '\0';
+        }
+    }
+    // Destructor
+    ~Ticket() {
+        delete seatNumber; // Free memory for seatNumber
+        delete[] ticketCode; // Free memory for ticketCode
     }
 
     void printDetails() const {
@@ -67,23 +110,30 @@ public:
     static int getTotalTicketsIssued() {
         return totalTicketsIssued;
     }
-
     friend std::istream& operator>>(std::istream& is, Ticket& ticket) {
         char codeBuffer[100];
         int seatNum;
+        double ticketPrice;
+        bool ticketVIP;
 
         cout << "Enter ticket code: ";
         is >> codeBuffer;
+        ticket.setTicketCode(codeBuffer);  // Use the setTicketCode function to handle memory management
 
         cout << "Enter seat number: ";
         is >> seatNum;
+        *ticket.seatNumber = seatNum; // Assume seatNumber is already allocated
 
-        delete[] ticket.ticketCode;
-        ticket.ticketCode = new char[strlen(codeBuffer) + 1];
-        strcpy_s(ticket.ticketCode, strlen(codeBuffer) + 1, codeBuffer);
+        cout << "Enter ticket price: ";
+        is >> ticketPrice;
+        ticket.price = ticketPrice; // Set the ticket price
 
-        delete ticket.seatNumber;
-        ticket.seatNumber = new int(seatNum);
+        cout << "Is this a VIP ticket? (1 for Yes, 0 for No): ";
+        is >> ticketVIP;
+        ticket.isVIP = ticketVIP; // Set the VIP status
+
+        // Skip the rest of the line to avoid issues with subsequent inputs
+        is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
         return is;
     }
@@ -134,9 +184,9 @@ public:
     bool operator==(const Ticket& other) const {
         return strcmp(this->ticketCode, other.ticketCode) == 0;
     }
-    friend std::ostream& operator<<(std::ostream& os, const Ticket& ticket) {
-        os << "Ticket Code: " << (ticket.ticketCode ? ticket.ticketCode : "N/A") << "\n";
-        os << "Seat Number: " << (ticket.seatNumber ? *ticket.seatNumber : 0) << "\n";
+    friend ostream& operator<<(ostream& os, const Ticket& ticket) {
+        os << "Ticket Code: " << ticket.ticketCode << "\n";
+        os << "Seat Number: " << ticket.seatNumber << "\n";
         os << "Price: $" << ticket.price << "\n";
         os << "VIP Status: " << (ticket.isVIP ? "Yes" : "No") << "\n";
         return os;
