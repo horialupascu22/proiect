@@ -1,6 +1,6 @@
 #include <string> // Include for std::string
 #include <iostream>
-#include <string.h> // Prefer cstring over string.h
+#include <string.h> 
 #include "event.h"
 #include "ticket.h"
 #include "customer.h"
